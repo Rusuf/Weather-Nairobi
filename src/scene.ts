@@ -82,8 +82,10 @@ export function weatherMood(day: SceneDay, hour: number): WeatherMood {
 
   if (day.label === 'Today' && timeMood(hour) === 'night') return 'night';
   if (has(condition, ['storm', 'thunder'])) return 'stormy';
-  if (day.rainChance >= 48 || has(condition, ['rain', 'shower', 'drizzle'])) return 'rainy';
+  if (has(condition, ['rain', 'shower', 'drizzle'])) return 'rainy';
   if (has(condition, ['cloud', 'overcast', 'fog', 'mist'])) return 'cloudy';
+  if (day.rainChance >= 55) return 'rainy';
+  if (day.rainChance >= 35) return 'cloudy';
   return 'sunny';
 }
 
@@ -93,6 +95,8 @@ export function weatherCopy(day: SceneDay) {
   if (has(condition, ['storm', 'thunder'])) return { title: 'Thunder', line: 'Strong weather over the city.' };
   if (has(condition, ['rain', 'shower', 'drizzle'])) return { title: 'Rain', line: 'Wet roads and low cloud.' };
   if (has(condition, ['cloud', 'overcast', 'fog', 'mist'])) return { title: 'Cloudy', line: 'A softer sky over Nairobi.' };
+  if (day.rainChance >= 55) return { title: 'Rain', line: 'Wet roads and low cloud.' };
+  if (day.rainChance >= 35) return { title: 'Cloudy', line: 'A softer sky over Nairobi.' };
   if (has(condition, ['clear', 'sun', 'bright'])) return { title: 'Sunny', line: 'Clear light across the skyline.' };
   return { title: day.condition, line: 'Current city conditions.' };
 }

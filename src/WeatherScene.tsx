@@ -27,6 +27,7 @@ export function WeatherScene({ day, place, now, index, priority }: Props) {
   const copy = weatherCopy(day);
   const temp = day.currentTemp ?? day.high;
   const feels = day.feelsLike ?? day.low;
+  const precipitation = mood === 'rainy' ? 'Rain' : 'Precip';
   const sceneStyle: SceneStyle = { '--accent': theme.accent, '--glow': theme.glow };
   const details = [
     ['Condition', day.condition],
@@ -38,7 +39,7 @@ export function WeatherScene({ day, place, now, index, priority }: Props) {
   ];
   const metrics = [
     { icon: <ThermometerSun size={18} />, label: 'Feels', value: `${feels}°` },
-    { icon: <CloudRain size={18} />, label: 'Rain', value: `${day.rainChance}%` },
+    { icon: mood === 'rainy' ? <CloudRain size={18} /> : <Cloud size={18} />, label: precipitation, value: `${day.rainChance}%` },
     { icon: <Wind size={18} />, label: 'Wind', value: `${day.wind} kph` },
     { icon: <Droplets size={18} />, label: 'Humidity', value: `${day.humidity}%` },
     { icon: <Gauge size={18} />, label: 'Range', value: `${day.low}° / ${day.high}°` },
