@@ -140,20 +140,16 @@ button {
   display: inline-flex;
   align-items: center;
   gap: 10px;
+  min-height: 42px;
+  padding: 0 15px;
   border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
   background: rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(20px);
   color: rgba(255, 255, 255, 0.9);
-  box-shadow: 0 20px 70px rgba(0, 0, 0, 0.22);
-}
-
-.brand-mark,
-.place-pill {
-  min-height: 42px;
-  padding: 0 15px;
-  border-radius: 999px;
   font-size: 0.88rem;
   font-weight: 800;
+  box-shadow: 0 20px 70px rgba(0, 0, 0, 0.22);
 }
 
 .brand-mark span {
@@ -380,13 +376,6 @@ button {
   bottom: 31%;
   background: rgba(248, 113, 113, 0.88);
   animation-delay: -2.6s;
-}
-
-.traffic-layer span:nth-child(3) {
-  bottom: 43%;
-  width: 25vw;
-  background: rgba(186, 230, 253, 0.8);
-  animation-delay: -4.4s;
 }
 
 .forecast-rail {

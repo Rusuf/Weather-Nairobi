@@ -17,7 +17,6 @@ export type SceneDay = {
   sunrise?: string;
   sunset?: string;
   summary?: string;
-  live?: boolean;
 };
 
 export type WeatherAiPoint = {

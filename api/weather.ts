@@ -1,4 +1,5 @@
 const WEATHER_AI_BASE_URL = 'https://api.weather-ai.co/v1/weather';
+
 const NAIROBI = {
   lat: '-1.2921',
   lon: '36.8219',
@@ -24,19 +25,11 @@ export default async function handler(request: ApiRequest, response: ApiResponse
   if (!apiKey) {
     return response.status(503).json({
       error: 'WEATHER_AI_API_KEY is not configured.',
-      hint: 'Add a Weather-AI key in local .env or Vercel environment variables.',
+      hint: 'Add WEATHER_AI_API_KEY to the server environment.',
     });
   }
 
-  const incoming = readQuery(request);
-  const params = new URLSearchParams({
-    lat: incoming.get('lat') ?? NAIROBI.lat,
-    lon: incoming.get('lon') ?? NAIROBI.lon,
-    days: incoming.get('days') ?? '7',
-    ai: incoming.get('ai') ?? 'true',
-    units: incoming.get('units') ?? 'metric',
-    lang: incoming.get('lang') ?? 'en',
-  });
+  const params = weatherParams(readQuery(request));
 
   try {
     const weatherResponse = await fetch(`${WEATHER_AI_BASE_URL}?${params.toString()}`, {
@@ -56,6 +49,17 @@ export default async function handler(request: ApiRequest, response: ApiResponse
       detail: error instanceof Error ? error.message : 'Unknown network error',
     });
   }
+}
+
+function weatherParams(incoming: URLSearchParams) {
+  return new URLSearchParams({
+    lat: incoming.get('lat') ?? NAIROBI.lat,
+    lon: incoming.get('lon') ?? NAIROBI.lon,
+    days: incoming.get('days') ?? '7',
+    ai: incoming.get('ai') ?? 'true',
+    units: incoming.get('units') ?? 'metric',
+    lang: incoming.get('lang') ?? 'en',
+  });
 }
 
 function readQuery(request: ApiRequest) {

@@ -15,6 +15,11 @@ type Props = {
   priority: boolean;
 };
 
+type SceneStyle = CSSProperties & {
+  '--accent': string;
+  '--glow': string;
+};
+
 export function WeatherScene({ day, place, now, index, priority }: Props) {
   const mood = weatherMood(day, now.hour);
   const theme = themes[mood];
@@ -22,9 +27,27 @@ export function WeatherScene({ day, place, now, index, priority }: Props) {
   const copy = weatherCopy(day);
   const temp = day.currentTemp ?? day.high;
   const feels = day.feelsLike ?? day.low;
+  const sceneStyle: SceneStyle = { '--accent': theme.accent, '--glow': theme.glow };
+  const details = [
+    ['Condition', day.condition],
+    ['Range', `${day.low}° / ${day.high}°`],
+    ['Humidity', `${day.humidity}%`],
+    ['Rain chance', `${day.rainChance}%`],
+    ['Wind', `${day.wind} kph`],
+    ['Sun', `${formatClock(day.sunrise)} / ${formatClock(day.sunset)}`],
+  ];
+  const metrics = [
+    { icon: <ThermometerSun size={18} />, label: 'Feels', value: `${feels}°` },
+    { icon: <CloudRain size={18} />, label: 'Rain', value: `${day.rainChance}%` },
+    { icon: <Wind size={18} />, label: 'Wind', value: `${day.wind} kph` },
+    { icon: <Droplets size={18} />, label: 'Humidity', value: `${day.humidity}%` },
+    { icon: <Gauge size={18} />, label: 'Range', value: `${day.low}° / ${day.high}°` },
+    { icon: <Navigation size={18} />, label: 'Scene', value: theme.place },
+    { icon: <Sun size={18} />, label: 'Sun', value: `${formatClock(day.sunrise)} / ${formatClock(day.sunset)}` },
+  ];
 
   return (
-    <section className={`scene scene-${mood}`} style={{ '--accent': theme.accent, '--glow': theme.glow } as CSSProperties}>
+    <section className={`scene scene-${mood}`} style={sceneStyle}>
       <img className="scene-image" src={image} alt="" decoding="async" draggable="false" loading={priority ? 'eager' : 'lazy'} />
       <div className="scene-overlay" style={{ background: theme.overlay }} />
       <div className={`time-wash time-${timeMood(now.hour)}`} />
@@ -59,23 +82,16 @@ export function WeatherScene({ day, place, now, index, priority }: Props) {
           </main>
 
           <aside className="detail-stack" aria-label={`${day.label} weather details`}>
-            <Detail label="Condition" value={day.condition} />
-            <Detail label="Range" value={`${day.low}° / ${day.high}°`} />
-            <Detail label="Humidity" value={`${day.humidity}%`} />
-            <Detail label="Rain chance" value={`${day.rainChance}%`} />
-            <Detail label="Wind" value={`${day.wind} kph`} />
-            <Detail label="Sun" value={`${formatClock(day.sunrise)} / ${formatClock(day.sunset)}`} />
+            {details.map(([label, value]) => (
+              <Detail key={label} label={label} value={value} />
+            ))}
           </aside>
         </div>
 
         <footer className="data-strip">
-          <Metric icon={<ThermometerSun size={18} />} label="Feels" value={`${feels}°`} />
-          <Metric icon={<CloudRain size={18} />} label="Rain" value={`${day.rainChance}%`} />
-          <Metric icon={<Wind size={18} />} label="Wind" value={`${day.wind} kph`} />
-          <Metric icon={<Droplets size={18} />} label="Humidity" value={`${day.humidity}%`} />
-          <Metric icon={<Gauge size={18} />} label="Range" value={`${day.low}° / ${day.high}°`} />
-          <Metric icon={<Navigation size={18} />} label="Scene" value={theme.place} />
-          <Metric icon={<Sun size={18} />} label="Sun" value={`${formatClock(day.sunrise)} / ${formatClock(day.sunset)}`} />
+          {metrics.map((metric) => (
+            <Metric key={metric.label} {...metric} />
+          ))}
         </footer>
       </div>
     </section>
