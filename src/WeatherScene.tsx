@@ -19,6 +19,8 @@ type Props = {
 type SceneStyle = CSSProperties & {
   '--accent': string;
   '--glow': string;
+  '--image-position': string;
+  '--mobile-image-position': string;
 };
 
 export function WeatherScene({ day, place, now, index, imageSeed, priority }: Props) {
@@ -28,7 +30,12 @@ export function WeatherScene({ day, place, now, index, imageSeed, priority }: Pr
   const copy = weatherCopy(day);
   const temp = day.currentTemp ?? day.high;
   const feels = day.feelsLike ?? day.low;
-  const sceneStyle: SceneStyle = { '--accent': theme.accent, '--glow': theme.glow };
+  const sceneStyle: SceneStyle = {
+    '--accent': theme.accent,
+    '--glow': theme.glow,
+    '--image-position': image.position,
+    '--mobile-image-position': image.mobilePosition ?? image.position,
+  };
   const daylight = sunWindow(day);
   const details = [
     ['Condition', day.condition],
@@ -42,7 +49,7 @@ export function WeatherScene({ day, place, now, index, imageSeed, priority }: Pr
 
   return (
     <section className={`scene scene-${mood}`} style={sceneStyle}>
-      <img className="scene-image" src={image} alt="" decoding="async" draggable="false" loading={priority ? 'eager' : 'lazy'} />
+      <img className="scene-image" src={image.src} alt="" decoding="async" draggable="false" loading={priority ? 'eager' : 'lazy'} />
       <div className="scene-overlay" style={{ background: theme.overlay }} />
       <div className={`time-wash time-${timeMood(now.hour)}`} />
       <WeatherFx mood={mood} />

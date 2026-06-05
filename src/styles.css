@@ -54,18 +54,8 @@ button {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center;
-  transform: scale(1.05);
+  object-position: var(--image-position, center);
   filter: saturate(1.06) contrast(1.04);
-}
-
-.scene-rainy .scene-image {
-  object-position: 52% center;
-}
-
-.scene-night .scene-image,
-.scene-stormy .scene-image {
-  object-position: 50% center;
 }
 
 .scene-overlay {
@@ -681,13 +671,8 @@ button {
     transform: translateY(-4px) scale(1.03);
   }
 
-  .scene-sunny .scene-image,
-  .scene-cloudy .scene-image {
-    object-position: 58% center;
-  }
-
-  .scene-rainy .scene-image {
-    object-position: 47% center;
+  .scene-image {
+    object-position: var(--mobile-image-position, var(--image-position, center));
   }
 }
 

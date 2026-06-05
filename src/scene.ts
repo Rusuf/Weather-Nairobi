@@ -19,44 +19,72 @@ import cityStormClouds from '../assets/City18.jpeg';
 import type { SceneDay, TimeMood, WeatherMood } from './types';
 
 type SceneTheme = {
-  images: string[];
+  images: SceneImage[];
   place: string;
   overlay: string;
   glow: string;
   accent: string;
 };
 
+type SceneImage = {
+  src: string;
+  position: string;
+  mobilePosition?: string;
+};
+
 export const themes: Record<WeatherMood, SceneTheme> = {
   sunny: {
-    images: [citySunnyPark, citySunnyWide, citySunnyHighway, citySunnyTraffic, citySunnyGlow],
+    images: [
+      image(citySunnyPark, '50% 48%', '50% 50%'),
+      image(citySunnyWide, '55% 50%', '52% 50%'),
+      image(citySunnyHighway, '50% 50%', '50% 50%'),
+      image(citySunnyTraffic, '54% 50%', '50% 50%'),
+      image(citySunnyGlow, '58% 50%', '54% 50%'),
+    ],
     place: 'Nairobi skyline',
     overlay: 'linear-gradient(120deg, rgba(255,183,3,.52), rgba(14,165,233,.16) 48%, rgba(3,7,18,.58))',
     glow: 'rgba(255, 183, 3, .44)',
     accent: '#FFE29A',
   },
   cloudy: {
-    images: [cityDryStreet, cityCloudySkyline, cityWetTraffic, cityRainStreet],
+    images: [
+      image(cityDryStreet, '48% 50%', '50% 50%'),
+      image(cityCloudySkyline, '58% 50%', '52% 50%'),
+      image(cityWetTraffic, '50% 50%', '50% 50%'),
+      image(cityRainStreet, '50% 54%', '50% 50%'),
+    ],
     place: 'Nairobi skyline',
     overlay: 'linear-gradient(120deg, rgba(142,167,184,.58), rgba(51,65,85,.24) 45%, rgba(3,7,18,.74))',
     glow: 'rgba(199, 210, 218, .28)',
     accent: '#DCEAF1',
   },
   rainy: {
-    images: [cityRain, cityRainStreet, cityWetTraffic, cityRainUmbrellas],
+    images: [
+      image(cityRain, '52% 50%', '50% 50%'),
+      image(cityRainStreet, '50% 54%', '50% 50%'),
+      image(cityWetTraffic, '50% 50%', '50% 50%'),
+      image(cityRainUmbrellas, '50% 50%', '48% 50%'),
+    ],
     place: 'CBD roads',
     overlay: 'linear-gradient(120deg, rgba(44,62,80,.74), rgba(15,23,42,.34) 48%, rgba(0,0,0,.78))',
     glow: 'rgba(103, 232, 249, .3)',
     accent: '#CFFAFE',
   },
   stormy: {
-    images: [cityLightning, cityStormClouds],
+    images: [image(cityLightning, '50% 45%', '50% 50%'), image(cityStormClouds, '55% 45%', '50% 50%')],
     place: 'Nairobi lights',
     overlay: 'linear-gradient(120deg, rgba(49,46,129,.72), rgba(15,23,42,.44) 48%, rgba(0,0,0,.84))',
     glow: 'rgba(196, 181, 253, .32)',
     accent: '#DDD6FE',
   },
   night: {
-    images: [cityEveningLights, cityNightLights, cityNightCore, cityNightRoad, cityNightClouds],
+    images: [
+      image(cityEveningLights, '50% 50%', '50% 50%'),
+      image(cityNightLights, '50% 50%', '50% 50%'),
+      image(cityNightCore, '50% 50%', '50% 50%'),
+      image(cityNightRoad, '48% 50%', '44% 50%'),
+      image(cityNightClouds, '50% 50%', '50% 50%'),
+    ],
     place: 'Nairobi lights',
     overlay: 'linear-gradient(120deg, rgba(15,23,42,.78), rgba(30,41,59,.24) 48%, rgba(0,0,0,.84))',
     glow: 'rgba(251, 146, 60, .26)',
@@ -67,6 +95,10 @@ export const themes: Record<WeatherMood, SceneTheme> = {
 export function imageForMood(mood: WeatherMood, index: number, seed: number) {
   const images = themes[mood].images;
   return images[(seed + index) % images.length];
+}
+
+function image(src: string, position: string, mobilePosition = position): SceneImage {
+  return { src, position, mobilePosition };
 }
 
 export function timeMood(hour: number): TimeMood {
