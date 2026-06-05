@@ -29,14 +29,15 @@ export function WeatherScene({ day, place, now, index, imageSeed, priority }: Pr
   const temp = day.currentTemp ?? day.high;
   const feels = day.feelsLike ?? day.low;
   const sceneStyle: SceneStyle = { '--accent': theme.accent, '--glow': theme.glow };
+  const daylight = sunWindow(day);
   const details = [
     ['Condition', day.condition],
     ['Range', `${day.low}° / ${day.high}°`],
     ['Humidity', `${day.humidity}%`],
     ['Rain chance', `${day.rainChance}%`],
     ['Wind', `${day.wind} kph`],
-    ['Sun', sunWindow(day)],
-  ];
+    daylight ? ['Sun', daylight] : undefined,
+  ].filter((detail): detail is [string, string] => Boolean(detail));
   const cues = dayCues(day, feels, theme.place);
 
   return (
@@ -111,12 +112,13 @@ function HourlyStrip({ hours }: { hours: WeatherHour[] }) {
 
 function dayCues(day: SceneDay, feels: number, scene: string) {
   const daylight = sunWindow(day);
+  const sunCue = daylight ? [{ icon: <Sun size={18} />, label: 'Sun window', value: daylight }] : [];
 
   if (!day.hours.length) {
     return [
       { icon: <ThermometerSun size={18} />, label: 'Feels now', value: `${feels}°` },
       { icon: <Navigation size={18} />, label: 'Scene', value: scene },
-      { icon: <Sun size={18} />, label: 'Sun window', value: daylight },
+      ...sunCue,
     ];
   }
 
@@ -131,14 +133,14 @@ function dayCues(day: SceneDay, feels: number, scene: string) {
     { icon: <Wind size={18} />, label: 'Wind peak', value: `${windiest.wind} kph ${formatHour(windiest.time)}` },
     { icon: <Sun size={18} />, label: 'Best dry window', value: bestWindow },
     { icon: <Navigation size={18} />, label: 'Scene', value: scene },
-    { icon: <Sun size={18} />, label: 'Sun window', value: daylight },
+    ...sunCue,
   ];
 }
 
 function sunWindow(day: SceneDay) {
   const sunrise = formatClock(day.sunrise);
   const sunset = formatClock(day.sunset);
-  return sunrise === '--' || sunset === '--' ? 'Not provided' : `${sunrise} / ${sunset}`;
+  return sunrise === '--' || sunset === '--' ? undefined : `${sunrise} / ${sunset}`;
 }
 
 function Metric({ icon, label, value }: { icon: ReactNode; label: string; value: string }) {

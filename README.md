@@ -110,13 +110,13 @@ Images live in `assets/`.
 
 The scene engine groups the images by weather mood:
 
-- Sunny: `City1.jpeg`, `City5.jpeg`, `City8.jpeg`, `City10.jpeg`, `City17.jpeg`
-- Cloudy: `City4.jpeg`, `City5.jpeg`, `City12.jpeg`, `City13.jpeg`, `City14.jpeg`
-- Rainy: `City2.jpeg`, `City3.jpeg`, `City7.jpeg`, `City16.jpeg`
-- Stormy: `City9.jpeg`, `City11.jpeg`, `City15.jpeg`, `City18.jpeg`
-- Night: `City2.jpeg`, `City6.jpeg`, `City9.jpeg`, `City11.jpeg`, `City18.jpeg`
+- Sunny: `City4.jpeg`, `City5.jpeg`, `City6.jpeg`, `City8.jpeg`, `City10.jpeg`
+- Cloudy: `City7.jpeg`, `City9.jpeg`, `City15.jpeg`, `City14.jpeg`
+- Rainy: `City3.jpeg`, `City14.jpeg`, `City15.jpeg`, `City16.jpeg`
+- Stormy: `City17.jpeg`, `City18.jpeg`
+- Night: `City1.jpeg`, `City2.jpeg`, `City11.jpeg`, `City12.jpeg`, `City13.jpeg`
 
-Only the active slide image loads eagerly. Other slide images use browser lazy loading. On each refresh, the app changes the starting image inside each weather mood pool, so sunny days rotate through sunny visuals, rainy days through rainy visuals, and so on.
+Only the active slide image loads eagerly. Other slide images use browser lazy loading. On each refresh, the app changes the starting image inside the selected weather mood pool, so sunny days rotate through sunny visuals, cloudy days can rotate through overcast and lightly wet city visuals, rainy days rotate through wet street visuals, and storm days rotate through storm visuals. From 7 PM, the scene mood shifts to the night image pool.
 
 ## User Interactions
 
