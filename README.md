@@ -19,16 +19,23 @@ Docs: https://weather-ai.co/docs
 
 The app calls Weather-AI through a local API proxy so the API key stays out of browser JavaScript.
 
-Client request:
+Daily client request:
 
 ```txt
-GET /api/weather?lat=-1.286389&lon=36.817223&days=7&ai=true&units=metric&lang=en
+GET /api/weather?endpoint=weather&lat=-1.286389&lon=36.817223&days=7&ai=true&units=metric&lang=en
 ```
 
-Weather-AI request made by the proxy:
+Hourly client request:
+
+```txt
+GET /api/weather?endpoint=hourly&lat=-1.286389&lon=36.817223&days=7&ai=true&units=metric&lang=en
+```
+
+Weather-AI requests made by the proxy:
 
 ```txt
 GET https://api.weather-ai.co/v1/weather
+GET https://api.weather-ai.co/v1/hourly
 Authorization: Bearer wai_<your_api_key>
 ```
 
@@ -40,7 +47,7 @@ The app requests:
 - `units=metric`
 - `lang=en`
 
-During local development, the proxy is implemented in `vite.config.ts`. The same request shape is also available in `api/weather.ts` for server-side environments.
+During local development, the proxy is implemented in `vite.config.ts`. The same request shape is also available in `api/weather.ts` for server-side environments. The proxy only accepts `endpoint=weather` or `endpoint=hourly`; anything else falls back to `weather`.
 
 ## Local Setup
 
@@ -90,9 +97,10 @@ npm run preview  # preview the production build locally
 1. `src/App.tsx` creates the Swiper scene shell.
 2. The app first requests Nairobi weather.
 3. If browser geolocation is allowed, it requests Weather-AI again with the user's coordinates.
-4. `src/weatherApi.ts` maps Weather-AI response fields into the app's `SceneDay` model.
-5. `src/scene.ts` chooses the mood, image pool, copy, overlay, and time-of-day treatment.
-6. `src/WeatherScene.tsx` renders the full-screen scene and weather metrics.
+4. `src/weatherApi.ts` maps Weather-AI daily and hourly response fields into the app's `SceneDay` model.
+5. Hourly data is grouped by day and sampled into a compact rhythm strip.
+6. `src/scene.ts` chooses the mood, image pool, copy, overlay, and time-of-day treatment.
+7. `src/WeatherScene.tsx` renders the full-screen scene, hourly strip, side summary, and day cues.
 
 Weather-AI is the only weather data provider. If the API key or network is unavailable, the app renders a small preview dataset so the interface still works locally.
 
@@ -108,12 +116,14 @@ The scene engine groups the images by weather mood:
 - Stormy: `City9.jpeg`, `City11.jpeg`, `City15.jpeg`, `City18.jpeg`
 - Night: `City2.jpeg`, `City6.jpeg`, `City9.jpeg`, `City11.jpeg`, `City18.jpeg`
 
-Only the active slide image loads eagerly. Other slide images use browser lazy loading.
+Only the active slide image loads eagerly. Other slide images use browser lazy loading. On each refresh, the app changes the starting image inside each weather mood pool, so sunny days rotate through sunny visuals, rainy days through rainy visuals, and so on.
 
 ## User Interactions
 
 - Swipe or scroll between forecast days.
 - Click the side day rail to jump to a day.
+- Scan the hourly strip for temperature and precipitation changes through the selected day.
+- Use the bottom day cues for warmest hour, wettest hour, wind peak, best dry window, scene source, and sun window.
 - Use keyboard navigation through Swiper.
 - Allow browser location to request weather for the user's current coordinates.
 
@@ -125,7 +135,7 @@ assets/               Nairobi scene images
 src/App.tsx           App shell, geolocation, and day navigation
 src/WeatherScene.tsx  Scene view and metric rendering
 src/scene.ts          Mood, image, copy, and time helpers
-src/weatherApi.ts     Weather-AI fetch and response mapping
+src/weatherApi.ts     Weather-AI daily/hourly fetch and response mapping
 src/types.ts          Shared TypeScript types
 src/styles.css        Full-screen scene styling
 vite.config.ts        Vite config and local API proxy

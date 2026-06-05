@@ -17,9 +17,22 @@ export type SceneDay = {
   sunrise?: string;
   sunset?: string;
   summary?: string;
+  hours: WeatherHour[];
+};
+
+export type WeatherHour = {
+  time: string;
+  temp: number;
+  rainChance: number;
+  wind: number;
+  condition: string;
 };
 
 export type WeatherAiPoint = {
+  time?: string;
+  hour?: string;
+  datetime?: string;
+  timestamp?: string;
   date?: string;
   temp?: number;
   temp_c?: number;
@@ -49,7 +62,11 @@ export type WeatherAiPoint = {
   summary?: string;
   ai_summary?: string;
   sunrise?: string;
+  sunrise_time?: string;
+  sunriseTime?: string;
   sunset?: string;
+  sunset_time?: string;
+  sunsetTime?: string;
   uv_index?: number;
   uv?: number;
 };
@@ -63,6 +80,8 @@ export type WeatherAiResponse = {
   current?: WeatherAiPoint;
   forecast?: WeatherAiPoint[];
   daily?: WeatherAiPoint[];
+  hourly?: WeatherAiPoint[];
+  hours?: WeatherAiPoint[];
   summary?: string;
   ai_summary?: string;
   source?: string;

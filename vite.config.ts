@@ -1,7 +1,7 @@
 import react from '@vitejs/plugin-react';
 import { defineConfig, loadEnv, type Plugin } from 'vite';
 
-const WEATHER_AI_BASE_URL = 'https://api.weather-ai.co/v1/weather';
+const WEATHER_AI_BASE_URL = 'https://api.weather-ai.co/v1';
 const NAIROBI = {
   lat: '-1.2921',
   lon: '36.8219',
@@ -35,17 +35,11 @@ function weatherApiDevProxy(mode: string): Plugin {
         }
 
         const incoming = new URL(request.url ?? '/api/weather', 'http://localhost').searchParams;
-        const params = new URLSearchParams({
-          lat: incoming.get('lat') ?? NAIROBI.lat,
-          lon: incoming.get('lon') ?? NAIROBI.lon,
-          days: incoming.get('days') ?? '7',
-          ai: incoming.get('ai') ?? 'true',
-          units: incoming.get('units') ?? 'metric',
-          lang: incoming.get('lang') ?? 'en',
-        });
+        const endpoint = incoming.get('endpoint') === 'hourly' ? 'hourly' : 'weather';
+        const params = weatherParams(incoming);
 
         try {
-          const weatherResponse = await fetch(`${WEATHER_AI_BASE_URL}?${params.toString()}`, {
+          const weatherResponse = await fetch(`${WEATHER_AI_BASE_URL}/${endpoint}?${params.toString()}`, {
             headers: {
               Authorization: `Bearer ${apiKey}`,
             },
@@ -53,7 +47,7 @@ function weatherApiDevProxy(mode: string): Plugin {
 
           response.statusCode = weatherResponse.status;
           response.setHeader('X-Weather-AI-Status', String(weatherResponse.status));
-          response.setHeader('X-Weather-AI-Endpoint', '/v1/weather');
+          response.setHeader('X-Weather-AI-Endpoint', `/v1/${endpoint}`);
           response.end(await weatherResponse.text());
         } catch (error) {
           response.statusCode = 502;
@@ -67,4 +61,15 @@ function weatherApiDevProxy(mode: string): Plugin {
       });
     },
   };
+}
+
+function weatherParams(incoming: URLSearchParams) {
+  return new URLSearchParams({
+    lat: incoming.get('lat') ?? NAIROBI.lat,
+    lon: incoming.get('lon') ?? NAIROBI.lon,
+    days: incoming.get('days') ?? '7',
+    ai: incoming.get('ai') ?? 'true',
+    units: incoming.get('units') ?? 'metric',
+    lang: incoming.get('lang') ?? 'en',
+  });
 }

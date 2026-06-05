@@ -64,9 +64,9 @@ export const themes: Record<WeatherMood, SceneTheme> = {
   },
 };
 
-export function imageForMood(mood: WeatherMood, index: number) {
+export function imageForMood(mood: WeatherMood, index: number, seed: number) {
   const images = themes[mood].images;
-  return images[index % images.length];
+  return images[(seed + index) % images.length];
 }
 
 export function timeMood(hour: number): TimeMood {
@@ -125,9 +125,21 @@ export function formatHeroDate(value: string) {
 
 export function formatClock(value?: string) {
   if (!value) return '--';
-  return new Date(value).toLocaleTimeString('en-KE', { hour: '2-digit', minute: '2-digit' });
+  if (/^\d{1,2}:\d{2}/.test(value)) return timeWithPeriod(value);
+
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return '--';
+
+  return parsed.toLocaleTimeString('en-KE', { hour: 'numeric', minute: '2-digit', hour12: true });
 }
 
 function has(value: string, needles: string[]) {
   return needles.some((needle) => value.includes(needle));
+}
+
+function timeWithPeriod(value: string) {
+  const [hour = '0', minute = '00'] = value.split(':');
+  const date = new Date();
+  date.setHours(Number(hour), Number(minute), 0, 0);
+  return date.toLocaleTimeString('en-KE', { hour: 'numeric', minute: '2-digit', hour12: true });
 }

@@ -11,6 +11,7 @@ import { fetchWeatherAi, NAIROBI, previewWeather } from './weatherApi';
 
 export function App() {
   const preview = useMemo(() => previewWeather(), []);
+  const imageSeed = useMemo(() => Math.floor(Math.random() * 1000), []);
   const [days, setDays] = useState<SceneDay[]>(preview.days);
   const [place, setPlace] = useState(preview.place);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -73,7 +74,7 @@ export function App() {
       >
         {days.map((day, index) => (
           <SwiperSlide key={`${day.label}-${day.date}`}>
-            <WeatherScene day={day} index={index} now={now} place={place} priority={index === activeIndex} />
+            <WeatherScene day={day} imageSeed={imageSeed} index={index} now={now} place={place} priority={index === activeIndex} />
           </SwiperSlide>
         ))}
       </Swiper>

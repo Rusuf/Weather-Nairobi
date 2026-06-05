@@ -1,4 +1,4 @@
-const WEATHER_AI_BASE_URL = 'https://api.weather-ai.co/v1/weather';
+const WEATHER_AI_BASE_URL = 'https://api.weather-ai.co/v1';
 
 const NAIROBI = {
   lat: '-1.2921',
@@ -29,10 +29,12 @@ export default async function handler(request: ApiRequest, response: ApiResponse
     });
   }
 
-  const params = weatherParams(readQuery(request));
+  const incoming = readQuery(request);
+  const endpoint = weatherEndpoint(incoming);
+  const params = weatherParams(incoming);
 
   try {
-    const weatherResponse = await fetch(`${WEATHER_AI_BASE_URL}?${params.toString()}`, {
+    const weatherResponse = await fetch(`${WEATHER_AI_BASE_URL}/${endpoint}?${params.toString()}`, {
       headers: {
         Authorization: `Bearer ${apiKey}`,
       },
@@ -40,7 +42,7 @@ export default async function handler(request: ApiRequest, response: ApiResponse
 
     const payload = await weatherResponse.json();
     response.setHeader('X-Weather-AI-Status', String(weatherResponse.status));
-    response.setHeader('X-Weather-AI-Endpoint', '/v1/weather');
+    response.setHeader('X-Weather-AI-Endpoint', `/v1/${endpoint}`);
 
     return response.status(weatherResponse.status).json(payload);
   } catch (error) {
@@ -49,6 +51,10 @@ export default async function handler(request: ApiRequest, response: ApiResponse
       detail: error instanceof Error ? error.message : 'Unknown network error',
     });
   }
+}
+
+function weatherEndpoint(incoming: URLSearchParams) {
+  return incoming.get('endpoint') === 'hourly' ? 'hourly' : 'weather';
 }
 
 function weatherParams(incoming: URLSearchParams) {
