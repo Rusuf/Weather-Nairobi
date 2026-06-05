@@ -1,37 +1,27 @@
 # Weather Nairobi
 
-Weather Nairobi is a Vite + React weather app that uses the Weather-AI API to render full-screen Nairobi weather scenes.
+Weather Nairobi is a Vite, React, and TypeScript app that uses Weather-AI to render swipeable full-screen weather scenes. The interface treats each forecast day as a Nairobi scene instead of a dashboard card.
 
-The UI is scene-based rather than card-based. Each forecast day becomes a swipeable view with weather-driven imagery, motion, color, and summary data.
+## Stack
 
-## Framework And Libraries
-
-- Vite
-- React 19
+- React 19 with Vite
 - TypeScript
 - Weather-AI API v1
 - Swiper.js
 - Lucide React
+- Zod for Weather-AI response validation
+- Vitest for focused logic tests
 
-## Weather-AI API
+## Weather-AI Integration
 
-Docs: https://weather-ai.co/docs
-
-The app calls Weather-AI through a local API proxy so the API key stays out of browser JavaScript.
-
-Daily client request:
+The browser calls a local `/api/weather` proxy. The proxy forwards requests to Weather-AI with the API key kept server-side.
 
 ```txt
 GET /api/weather?endpoint=weather&lat=-1.286389&lon=36.817223&days=7&ai=true&units=metric&lang=en
-```
-
-Hourly client request:
-
-```txt
 GET /api/weather?endpoint=hourly&lat=-1.286389&lon=36.817223&days=7&ai=true&units=metric&lang=en
 ```
 
-Weather-AI requests made by the proxy:
+Proxy upstream calls:
 
 ```txt
 GET https://api.weather-ai.co/v1/weather
@@ -39,76 +29,58 @@ GET https://api.weather-ai.co/v1/hourly
 Authorization: Bearer wai_<your_api_key>
 ```
 
-The app requests:
-
-- `lat` and `lon` for the active location
-- `days` for the forecast window
-- `ai=true` for Weather-AI summary data
-- `units=metric`
-- `lang=en`
-
-During local development, the proxy is implemented in `vite.config.ts`. The same request shape is also available in `api/weather.ts` for server-side environments. The proxy only accepts `endpoint=weather` or `endpoint=hourly`; anything else falls back to `weather`.
+`vite.config.ts` provides the development proxy. `api/weather.ts` provides the same server-side request shape for hosted environments.
 
 ## Local Setup
 
-Install dependencies:
-
 ```bash
 npm install
-```
-
-Create the local environment file:
-
-```bash
 cp .env.example .env
+npm run dev
 ```
 
-Add your Weather-AI key:
+Add your Weather-AI key to `.env`:
 
 ```txt
 WEATHER_AI_API_KEY=wai_your_key_here
 VITE_FORECAST_DAYS=7
 ```
 
-Start the development server:
-
-```bash
-npm run dev
-```
-
-Open the URL printed by Vite, usually:
-
-```txt
-http://localhost:5173
-```
-
-Restart the dev server after changing `.env`.
+Open the Vite URL printed in the terminal, usually `http://localhost:5173`. Restart the dev server after changing `.env`.
 
 ## Scripts
 
 ```bash
 npm run dev      # start local development
+npm run test     # run unit tests
 npm run build    # type-check and create production build
 npm run preview  # preview the production build locally
 ```
 
-## How The App Works
+## Architecture
 
-1. `src/App.tsx` creates the Swiper scene shell.
-2. The app first requests Nairobi weather.
-3. If browser geolocation is allowed, it requests Weather-AI again with the user's coordinates.
-4. `src/weatherApi.ts` maps Weather-AI daily and hourly response fields into the app's `SceneDay` model.
-5. Hourly data is grouped by day and sampled into a compact rhythm strip.
-6. `src/scene.ts` chooses the mood, image pool, copy, overlay, and time-of-day treatment.
-7. `src/WeatherScene.tsx` renders the full-screen scene, hourly strip, side summary, and day cues.
+`src/App.tsx` owns the app shell, geolocation, and day navigation. It first loads Nairobi weather, then requests the user's coordinates if browser location is allowed.
 
-Weather-AI is the only weather data provider. If the API key or network is unavailable, the app renders a small preview dataset so the interface still works locally.
+`src/weatherApi.ts` fetches Weather-AI daily and hourly data, validates payloads through `src/weatherSchema.ts`, and maps provider fields into a stable `SceneDay` model.
+
+`src/scene.ts` owns the mood rules, time-of-day rules, image pools, image focal points, copy, and overlays.
+
+`src/WeatherScene.tsx` renders the selected scene from the local model. It shows the hero reading, detail panel, hourly strip, and derived day cues such as warmest hour, wettest hour, wind peak, best dry window, scene source, and sun window.
+
+Weather-AI is the only weather provider. If the key or network is unavailable, the app falls back to a small local preview dataset so the UI remains inspectable during development.
+
+## Scene Rules
+
+- Storm or thunder conditions use storm scenes.
+- Rain chance of `70%` or higher uses storm scenes.
+- Rain and shower conditions below that threshold use rainy scenes.
+- Cloud, overcast, fog, and mist use cloudy scenes.
+- From 7 PM, the scene shifts to the night image pool.
+- Each image has desktop and mobile focal points to keep full-screen crops intentional.
 
 ## Scene Assets
 
-Images live in `assets/`.
-
-The scene engine groups the images by weather mood:
+Images live in `assets/` and are grouped by weather mood:
 
 - Sunny: `City4.jpeg`, `City5.jpeg`, `City6.jpeg`, `City8.jpeg`, `City10.jpeg`
 - Cloudy: `City7.jpeg`, `City9.jpeg`, `City15.jpeg`, `City14.jpeg`
@@ -116,33 +88,30 @@ The scene engine groups the images by weather mood:
 - Stormy: `City17.jpeg`, `City18.jpeg`
 - Night: `City1.jpeg`, `City2.jpeg`, `City11.jpeg`, `City12.jpeg`, `City13.jpeg`
 
-Only the active slide image loads eagerly. Other slide images use browser lazy loading. On each refresh, the app changes the starting image inside the selected weather mood pool, so sunny days rotate through sunny visuals, cloudy days can rotate through overcast and lightly wet city visuals, rainy days rotate through wet street visuals, and storm days rotate through storm visuals. From 7 PM, the scene mood shifts to the night image pool.
-
-## User Interactions
-
-- Swipe or scroll between forecast days.
-- Click the side day rail to jump to a day.
-- Scan the hourly strip for temperature and precipitation changes through the selected day.
-- Use the bottom day cues for warmest hour, wettest hour, wind peak, best dry window, scene source, and sun window.
-- Use keyboard navigation through Swiper.
-- Allow browser location to request weather for the user's current coordinates.
+Only the active slide image loads eagerly. Other slide images use browser lazy loading. On refresh, the starting image changes inside the selected mood pool only.
 
 ## Project Structure
 
 ```txt
-api/weather.ts        Server-side Weather-AI proxy
-assets/               Nairobi scene images
-src/App.tsx           App shell, geolocation, and day navigation
-src/WeatherScene.tsx  Scene view and metric rendering
-src/scene.ts          Mood, image, copy, and time helpers
-src/weatherApi.ts     Weather-AI daily/hourly fetch and response mapping
-src/types.ts          Shared TypeScript types
-src/styles.css        Full-screen scene styling
-vite.config.ts        Vite config and local API proxy
+api/weather.ts             Server-side Weather-AI proxy
+assets/                    Nairobi scene images
+src/App.tsx                App shell, geolocation, and navigation
+src/WeatherScene.tsx       Scene rendering
+src/scene.ts               Mood rules, image pools, and time helpers
+src/scene.test.ts          Scene rule tests
+src/weatherApi.ts          Weather-AI fetching and mapping
+src/weatherSchema.ts       Weather-AI response validation
+src/weatherSchema.test.ts  Schema tests
+src/types.ts               Shared TypeScript types
+src/styles.css             Full-screen scene styling
+vite.config.ts             Vite config and local proxy
 ```
 
-## Notes
+## Testing
 
-- Keep `WEATHER_AI_API_KEY` server-side only.
-- Keep `VITE_FORECAST_DAYS` within the limit allowed by the Weather-AI plan.
-- Add new city imagery by placing files in `assets/` and assigning them to a mood pool in `src/scene.ts`.
+Vitest covers the rules most likely to regress:
+
+- High rain chance escalates to storm scenes.
+- Night mood begins at 7 PM.
+- Storm and night images do not leak into the wrong mood pools.
+- Weather-AI payload validation accepts expected fields and rejects invalid field types.

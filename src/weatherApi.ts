@@ -1,4 +1,5 @@
 import type { SceneDay, WeatherAiPoint, WeatherAiResponse, WeatherHour, WeatherPayload } from './types';
+import { parseWeatherAiResponse } from './weatherSchema';
 
 export const NAIROBI = {
   latitude: -1.286389,
@@ -62,7 +63,7 @@ export function previewWeather(): WeatherPayload {
 
 async function fetchWeatherEndpoint(endpoint: 'weather' | 'hourly', latitude: number, longitude: number) {
   const response = await fetch(weatherUrl(endpoint, latitude, longitude));
-  const payload = (await response.json()) as WeatherAiResponse;
+  const payload = parseWeatherAiResponse(await response.json()) as WeatherAiResponse;
 
   if (!response.ok) {
     throw new Error(payload.error ?? payload.detail ?? payload.hint ?? `Weather-AI returned ${response.status}`);
